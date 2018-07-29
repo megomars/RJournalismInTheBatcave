@@ -1,0 +1,225 @@
+---
+title: "Chapter 2"
+tutorial:
+  id: "code.r-journalism/chapter-2"
+  version: .85
+output:
+  learnr::tutorial:
+    progressive: true
+    theme: lumen
+    highlight: espresso
+runtime: shiny_prerendered
+---
+
+
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+knitr::opts_chunk$set(echo = FALSE)
+burgers <- data.frame(id=c(60006,60007,60008,60009, 60010), name=c("Bob", "Linda", "Louise", "Tina", "Gene"), age=c(45, 44, 12, 13, 11), grade=c(NA, NA, "seventh", "eighth", "sixth"))
+
+burgers$grade <- factor(burgers$grade)
+
+burgers$id <- factor(burgers$id)
+burgers$name <- as.character(burgers$name)
+burgers <- rename(burgers, `First name`=name)
+
+burgers2 <- data.frame(id=c(60006,60007,60008,60009, 60010), name=c("Bob", "Linda", "Louise", "Tina", "Gene"), age=c(45, 44, 12, 13, 11), grade=c(NA, NA, "seventh", "eighth", "sixth"))
+burgers2$grade <- factor(burgers2$grade)
+
+burgers2$id <- factor(burgers2$id)
+burgers2$name <- as.character(burgers2$name)
+burgers2 <- rename(burgers2, employee_id=id)
+
+
+nospace <- function(a) {
+  a <- gsub(" ","",a) 
+  gsub("\\n", "", a)
+  gsub("\\`", "", a)
+}
+
+
+
+is_bad_code <- function(user_code, check_code, envir_result) {
+
+  is_null <- is.null(eval(parse(text = user_code)))
+  e_rows <- nrow(eval(parse(text = user_code)))
+  r_rows <- nrow(eval(parse(text = check_code), envir = envir_result))
+  e_cols <- ncol(eval(parse(text = user_code)))
+  r_cols <- ncol(eval(parse(text = check_code), envir = envir_result))
+  e_type <- typeof(eval(parse(text = user_code)))
+  r_type <- typeof(eval(parse(text = check_code), envir=envir_result))
+  e_len <- length(eval(parse(text = user_code)))
+  r_len <- length(eval(parse(text = check_code)))
+  if (is_null!=T){
+    if (e_len!=0 & r_len!=0) {
+      if (e_type==r_type) {
+       if (e_type!="character" & e_type!="double" & e_type!="integer" & e_type!="logical")  {
+          if (e_rows==r_rows && e_cols==r_cols) {
+            eval(parse(text = user_code)) != eval(parse(text = check_code), envir = envir_result)
+          } else {
+            TRUE
+          }
+        } else { eval(parse(text = user_code)) != eval(parse(text = check_code), envir = envir_result) }
+      } else {
+        TRUE
+      }
+    } else { TRUE }
+  } else { nospace(user_code) != nospace(check_code)}
+}
+
+
+checker <- function(label, user_code, check_code, envir_result, evaluate_result, ...) {
+  if (is_bad_code(user_code, check_code, envir_result)) {
+    return(list(message = "Code wasn't right!", correct = FALSE, location = "append"))
+  } else {
+    return(list(message = "Great Job!", correct = TRUE, location = "append"))
+  }
+}  
+
+tutorial_options(exercise.timelimit = 30, exercise.checker = checker)
+
+```
+
+
+## CSVs
+
+```{r quiz1, echo=FALSE}
+quiz(caption = "Quiz 1",
+  question("If you import a CSV with read.csv(), what argument do you pass to make sure strings are not interpreted as factors?",
+    answer('read.csv("data.csv", stringsAsFactors=F)', correct=T),
+    answer('read.csv("data.csv", interpretStrings=T)'),
+    answer('read.csv("data.csv", factors=F)'),
+    answer('read.csv("data.csv", strings=T)'),
+    random_answer_order= TRUE
+  ),
+  question("When exporting a csv, how do you get rid of NAs with the readr package?",
+    answer('write_csv(df_csv, "data/transformed_data.csv", na="")', correct = TRUE),
+    answer('write.csv(df_csv, "data/transformed_data.csv", na="")'),
+    answer('write_csv(df_csv, "data/transformed_data.csv", NA="")'),
+    answer('write.csv(df_csv, "data/transformed_data.csv", is.na=F)'),
+    random_answer_order= TRUE
+  )
+)
+
+```
+
+## Excel
+
+```{r quiz2, echo=FALSE}
+quiz(caption = "Quiz 2",
+  question("If you import an Excel file and it has 5 buffer rows at the top before the real data starts, how do you deal with that using the **readxl** package?",
+    answer('read_excel("stats.xls", sheet=1, skip=5)', correct=T),
+    answer('read_excel("stats.xls", sheet=1, row=5)'),
+    answer('read_excel("stats.xls", sheet=1, row=6)'),
+    answer('read_excel("stats.xls", sheet=1, row=6)'),
+    random_answer_order= TRUE
+  ),
+  question("When exporting a csv, how do you get rid of NAs with the readr package?",
+    answer('write_csv(df_csv, "data/transformed_data.csv", na="")', correct = TRUE),
+    answer('write.csv(df_csv, "data/transformed_data.csv", na="")'),
+    answer('write_csv(df_csv, "data/transformed_data.csv", NA="")'),
+    answer('write.csv(df_csv, "data/transformed_data.csv", is.na=F)'),
+    random_answer_order= TRUE
+  )
+)
+```
+
+
+### Column names
+
+What if you import in a spreadsheet with a space in the column name like below?
+
+```{r show_burgers}
+burgers
+```
+
+How do you refer to the the *First name* variable/column with **$** and not the **[]**?
+
+```{r v2, exercise=TRUE}
+# Add to the line below 
+
+burgers$
+```
+
+
+```{r v2-check}
+burgers$`First name`
+``` 
+
+
+
+### Clean up column name
+
+Let's create a new data frame **burgers2** from **burgers** because we're going to change it up.
+
+Run the command on the *First name* variable/column to strip out the spaces and characters and replace them with periods.
+
+
+```{r v3, exercise=TRUE}
+# Modify the line of code below
+
+burgers2 <- burgers
+
+colnames(burgers2) <- _______(colnames(burgers2))
+
+burgers2
+```
+
+
+```{r v3-check}
+burgers2 <- burgers
+
+colnames(burgers2) <- make.names(colnames(burgers2))
+
+burgers2
+``` 
+
+
+### Rename a column
+
+Use the special **dplyr** function to rename the *id* variable in **burgers** to *employee_id*
+
+
+
+```{r rn, exercise=TRUE}
+# Modify the line of code below
+
+burgers2 <- 
+  
+burgers2
+```
+
+
+```{r rn-check}
+burgers2 <- rename(burgers, employee_id=id)
+
+burgers2
+``` 
+
+
+
+### Filter out NAs
+
+```{r show_burgers2}
+burgers2
+```
+
+Create a new data frame called **kids** by filtering out the NAs from *grade* column in **burgers**.
+
+
+```{r na, exercise=TRUE}
+# Modify the line of code below 
+
+kids <- _______(burgers2, !____(______))
+
+kids
+```
+
+
+```{r na-check}
+kids <- filter(burgers2, !is.na(grade))
+
+kids
+``` 
