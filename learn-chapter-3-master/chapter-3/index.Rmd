@@ -1,0 +1,703 @@
+---
+title: "Chapter 3"
+tutorial:
+  id: "code.r-journalism/chapter-3"
+  version: .85
+output:
+  learnr::tutorial:
+    progressive: true
+    theme: lumen
+    highlight: espresso
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(lubridate)
+library(stringr)
+knitr::opts_chunk$set(echo = FALSE)
+bo <- readRDS("bw.rds")
+colnames(bo) <- make.names(colnames(bo))
+orcas <- bo %>% filter(Species=="Killer Whale; Orca")
+orcas2 <- select(orcas, -Species)
+orcas3 <- orcas2 %>% arrange(Facility)
+orcas4 <- mutate(orcas3, status_num=case_when(Status=="DEAD" ~ 1, TRUE ~ 0))
+alive_dead <- orcas4 %>%
+  summarize(total=n_distinct(NOAA.ID), died=sum(status_num))
+
+perc_dead <- alive_dead %>%
+  mutate(percent_dead=died/total*100)
+
+owner_percent <- bo %>%
+   group_by(Owner, Species) %>%
+   summarize(total=n()) %>%
+   mutate(percent=round(total/sum(total, na.rm=T)*100,2)) %>%
+   select(-total) %>%
+   spread(Species, percent)
+
+owner_total <- bo %>%
+   group_by(Owner, Species) %>%
+   summarize(total=n())
+
+bo2 <- mutate(bo, Name=str_to_lower(Name),
+              Sex=str_to_title(Sex))
+
+bo3 <- mutate(bo2,
+             sex_species=str_c(Sex, " ", Species))
+
+bo4 <- mutate(bo3,
+             sex_species=str_replace(sex_species, " Killer Whale;", "")) %>%
+      mutate(sex_species=str_replace(sex_species, " Whale", ""))
+
+bo_dates <- bo %>%
+  mutate(Captivity.Date=dmy(Captivity.Date))
+
+bo_dates2 <- bo_dates %>%
+  mutate(month_number=month(Captivity.Date))
+bo_dates3 <- bo_dates2  %>%
+  mutate(month_label=month(Captivity.Date, label=T))
+
+
+nospace <- function(a) {
+  b <- gsub(" ","",a) 
+  gsub("\\n", "", b)
+}
+
+
+
+is_bad_code <- function(user_code, check_code, envir_result) {
+
+  is_null <- is.null(eval(parse(text = user_code)))
+  e_rows <- nrow(eval(parse(text = user_code)))
+  r_rows <- nrow(eval(parse(text = check_code), envir = envir_result))
+  e_cols <- ncol(eval(parse(text = user_code)))
+  r_cols <- ncol(eval(parse(text = check_code), envir = envir_result))
+  e_type <- typeof(eval(parse(text = user_code)))
+  r_type <- typeof(eval(parse(text = check_code), envir=envir_result))
+  e_len <- length(eval(parse(text = user_code)))
+  r_len <- length(eval(parse(text = check_code)))
+  if (is_null!=T){
+    if (e_len!=0 & r_len!=0) {
+      if (e_type==r_type) {
+        if (e_type!="character" & e_type!="double" & e_type!="integer" & e_type!="logical") {
+          if (e_rows==r_rows && e_cols==r_cols) {
+            eval(parse(text = user_code)) != eval(parse(text = check_code), envir = envir_result)
+          } else {
+            TRUE
+          }
+        } else { eval(parse(text = user_code)) != eval(parse(text = check_code), envir = envir_result) }
+      } else {
+        TRUE
+      }
+    } else { TRUE }
+  } else { nospace(user_code) != nospace(check_code)}
+}
+
+checker <- function(label, user_code, check_code, envir_result, evaluate_result, ...) {
+  if (is_bad_code(user_code, check_code, envir_result)) {
+    return(list(message = "Code wasn't right!", correct = FALSE, location = "append"))
+  } else {
+    return(list(message = "Great Job!", correct = TRUE, location = "append"))
+  }
+}  
+
+tutorial_options(exercise.timelimit = 30, exercise.checker = checker)
+#tutorial_options(exercise.checker = checkthat::check_exercise)
+
+
+```
+
+## Transforming and analyzing data
+
+Consider this Marine Mammal Inventory Report data set from the National Oceanic and Atmospheric Administration.
+
+It has the location of every Beluga and Orca whale in the United States since the '70s.
+
+Currently, the data frame is in the environment and has 494 rows.
+
+This view shows the first six rows.
+
+```{r data_view}
+head(bo)
+```
+
+Each animal is represented by a *NOAA.ID* (because some do not have names) and might show up multiple times in the data frame.
+
+For example, the Beluga Whale Blanchon is NOA0000719 and has been at three facilities but his latest *Status* shows him as "DEAD".
+
+### Filter
+
+Please create a data frame of Orca whales only from the **bo** data frame.
+
+We'll name the new data frame **orcas**.
+
+
+```{r f, exercise=TRUE}
+# Add to the line below 
+
+orcas <- bo %>%
+  
+unique(orcas$Species)
+```
+
+
+```{r f-check}
+orcas <- bo %>% filter(Species=="Killer Whale; Orca")
+  
+unique(orcas$Species)
+``` 
+
+
+<div id="f-hint">
+**Hint:** Delete the commented line out before submitting.
+</div>
+
+### Select
+
+Drop the column/variable *Species* since there's only one variable in it now.
+
+```{r s, exercise=TRUE}
+# Add to the line below
+
+orcas2 <- orcas
+  
+colnames(orcas2)
+```
+
+
+```{r s-check}
+orcas2 <- select(orcas, -Species)
+
+colnames(orcas2)
+``` 
+
+
+### Arrange
+
+Sort the **orcas** data frame based on the *Facility* column in alphabetical order.
+
+
+```{r a, exercise=TRUE}
+# Add to the line below
+
+orcas3 <- orcas2
+  
+
+head(orcas3)
+```
+
+
+```{r a-check}
+orcas3 <- orcas2 %>% arrange(Facility)
+  
+
+head(orcas3)
+``` 
+
+
+### Mutate
+
+Create a new column called *status_num* to fill with a 1 if *Status* is "DEAD" or 0 if alive. Save the transformed data frame back into **orcas**
+
+
+```{r m, exercise=TRUE}
+# Transform the code below
+
+orcas4 <- orcas3
+  
+
+head(orcas4)
+```
+
+
+```{r m-check}
+orcas4 <- mutate(orcas3, status_num=case_when(Status=="DEAD" ~ 1, TRUE ~ 0))
+  
+
+head(orcas4)
+``` 
+
+<div id="m-hint">
+**Hint:** You may want to use the dplyr `case_when()` function nested in another function.
+</div>
+
+### Summarize
+
+
+Count up the number of total Orcas by counting the unique *NOAA.ID*s and how many have died by adding up the *status_num*
+
+
+
+```{r sum, exercise=TRUE}
+# Add to the line below
+
+alive_dead <- orcas4
+  
+alive_dead
+```
+
+
+```{r sum-check}
+alive_dead <- orcas4 %>%
+  summarize(total=n_distinct(NOAA.ID), died=sum(status_num))
+``` 
+
+<div id="summarize-hint">
+**Hint:** You may want to use the dplyr `n_distinct()` function nested in another function.
+</div>
+
+### Percent
+
+
+What's the percent of dead Orcas?
+
+Create a new column/variable called *percent_dead*.
+
+You do **not** need to round the results.
+
+
+```{r m2, exercise=TRUE}
+# Add to the line below
+
+perc_dead <- alive_dead
+
+perc_dead
+```
+
+
+```{r m2-check}
+perc_dead <- alive_dead %>%
+  mutate(percent_dead=died/total*100)
+
+perc_dead
+``` 
+
+
+<div id="m2-hint">
+**Hint:** But don't forget to multiply the results by 100 to get the percent.
+</div>
+
+Now figure how the percent of Orcas still alive.
+
+Create a new column/variable called *percent_alive*.
+
+You do **not** need to round the results.
+
+```{r m3, exercise=TRUE}
+# Add to the line below
+
+percent_dead_alive <- perc_dead
+
+percent_dead_alive
+```
+
+
+```{r m3-check}
+percent_dead_alive <- perc_dead %>%
+  mutate(percent_alive=100-percent_dead)
+
+percent_dead_alive
+``` 
+
+
+### Group By
+
+Consider the **bo** data frame again.
+
+
+```{r data_view2}
+head(bo)
+```
+
+Which *Facility* had the most Orcas and Belugas combined? 
+
+Go ahead and call the new column *mammal_count*.
+
+List them from highest count to lowest.
+
+
+```{r fc, exercise=TRUE}
+# Add to the line below
+
+facilities_count <- bo
+
+facilities_count
+```
+
+
+```{r fc-check}
+facilities_count <- bo %>%
+  group_by(Facility) %>%
+  summarize(mammal_count=n()) %>%
+  arrange(-mammal_count)
+
+facilities_count
+``` 
+
+
+
+<div id="fc-hint">
+**Hint:** `n()` is used to count. But use it correctly.
+</div>
+
+## Tidying and joining data
+
+Consider the **bo** data set again.
+
+```{r data_view3}
+head(bo)
+```
+
+### Turn a tall data frame wide
+
+Summarize the data and count the total number of Orcas and Belugas (separately) per facility from the *Species* variable. Use the *mammal_count* as a column name again.
+
+Then turn the tall data into a wide data frame that has these columns: Facility, Belugas, Orcas.
+
+```{r w, exercise=TRUE}
+# Add to the line below
+
+facilities_count <- bo %>%
+   group_by(Facility, ________) %>%
+   summarize(_______=___) %>%
+   ______(_______, _____)
+
+facilities_count
+```
+
+
+```{r w-check}
+facilities_count <- bo %>%
+  group_by(Facility, Species) %>%
+  summarize(mammal_count=n()) %>%
+  spread(Species, mammal_count)
+
+facilities_count
+``` 
+
+
+
+<div id="w-hint">
+**Hint:** You may want to use the **bo** data frame. And eventually the `spread()` function from the **tidyr** package.
+</div>
+
+### Turn a wide data frame into a tall tidy data frame
+
+Here's a wide data frame with *Owners* and percent of Belugas compared to Orca whales owned.
+
+
+
+```{r display_this}
+head(owner_percent)
+```
+
+
+Make this dataframe called **owner_percent** tidy for me (So the mammal types are in one column and the total is in another).
+
+Call the new columns *Species* and *Total*.
+
+
+```{r t, exercise=TRUE, exercise.lines=4}
+# Add to the line below
+
+owner_percent %>%
+  
+```
+
+
+```{r t-check}
+
+owner_percent %>%
+  gather("Species", "Total", 2:3)
+
+``` 
+
+
+<div id="t-hint">
+**Hint:** You may want to use the `gather()` function.
+</div>
+
+### Join Data
+
+Consider these two data sets:
+
+* **owner_percent**
+
+```{r owner_percent}
+owner_percent
+```
+
+* **owner_total**
+
+
+```{r owner_total}
+owner_total
+```
+
+Join these two data sets and call it **owner_total_percent**.
+
+Start with **owner_percent** and have it joined with **owner_total** in a left direction.
+
+```{r j, exercise=TRUE, exercise.lines=4}
+# Add to the line below
+
+owner_percent_total <- _____join(________, ________)
+  
+owner_percent_total
+```
+
+
+```{r j-check}
+
+owner_percent_total <- left_join(owner_percent, owner_total)
+  
+owner_percent_total
+
+``` 
+
+
+
+## Handling strings
+
+Let's load the **stringr** package.
+
+Consider the **bo** data frame again.
+
+```{r string_data}
+library(stringr)
+
+bo
+```
+
+### Lower case
+
+Let's use the functions in it to manipulate the strings in this data frame.
+
+Turn the names in *Name* to lower case.
+
+
+
+```{r low, exercise=TRUE, exercise.lines=4}
+bo$Name <- ________(bo$Name)
+
+bo
+```
+
+
+```{r low-check}
+bo$Name <- str_to_lower(bo$Name)
+
+bo
+``` 
+
+
+### Title case
+
+Convert the variables in *Sex* to title case.
+
+
+```{r ti, exercise=TRUE, exercise.lines=4}
+bo$Name <- ________(bo$Name)
+
+bo
+```
+
+
+```{r ti-check}
+bo$Sex <- str_to_title(bo$Sex)
+
+bo2 <- bo
+bo2
+``` 
+
+
+### Combine string
+
+Please create a new variable called *sex_species* that combines *Sex* and *Species* columns with a space in between.
+
+```{r c, exercise=TRUE, exercise.lines=4}
+bo3 <- mutate(bo2, 
+             _________=_____(_______________________))
+bo3
+```
+
+
+```{r c-check}
+bo3 <- mutate(bo2,
+             sex_species=str_c(Sex, " ", Species))
+
+``` 
+
+
+### Substitute string
+
+Now, replace all mentions of " Killer Whale;" and " Whale" from the *sex_species* column with a blank.
+
+So "Male Killer Whale; Orca" turns in to "Male Orca" and "Male Beluga Whale" turns into "Male Beluga"
+
+
+```{r rep, exercise=TRUE, exercise.lines=5}
+bo4 <- mutate(bo3, 
+             sex_species=________(_______________________)) %>%
+      mutate(sex_species=________(_______________________))
+
+bo4$sex_species
+```
+
+
+```{r rep-check}
+
+bo4 <- mutate(bo3,
+             sex_species=str_replace(sex_species, " Killer Whale;", "")) %>%
+      mutate(sex_species=str_replace(sex_species, " Whale", ""))
+
+bo4$sex_species
+``` 
+
+
+<div id="rep-hint">
+**Hint:** You may need to use the str_xxxxxxxx function more than once. Also, pay attention to the order. That will be important.
+</div>
+
+
+
+### Detect strings
+
+Let's look at the first six rows of the **bo** data frame again.
+
+```{r data_view4}
+head(bo)
+```
+
+
+Create a new data frame called **seaworlds** and use filter to keep only the rows that mention "Sea World" in the *Facility* column.
+
+
+```{r det, exercise=TRUE, exercise.lines=5}
+seaworlds <- filter(bo,
+                    ______(_____________))
+
+seaworlds
+```
+
+
+```{r det-check}
+seaworlds <- filter(bo,
+             str_detect(Facility, "Sea World"))
+
+seaworlds
+``` 
+
+
+## Dealing with dates
+
+Consider the original **bo** data frame.
+
+```{r data_view5}
+head(bo)
+```
+
+
+### Convert this date
+
+Turn *Captivity.Date* into a date data R can recognize.
+
+We'll use the **lubridate** package.
+
+
+```{r da, exercise=TRUE, exercise.lines=5}
+bo_dates <- bo %>%
+  mutate(Captivity.Date=____(_______))
+
+bo_dates
+```
+
+
+```{r da-check}
+bo_dates <- bo %>%
+  mutate(Captivity.Date=dmy(Captivity.Date))
+
+bo_dates
+``` 
+
+
+### Extract the month
+
+Create a new column called *month_number* and extract the month (as a number) from the *Captivity.Date*.
+
+
+```{r mo, exercise=TRUE, exercise.lines=5}
+bo_dates2 <- bo_dates %>%
+  mutate(month_number=____(_______))
+
+bo_dates2
+```
+
+
+```{r mo-check}
+bo_dates2 <- bo_dates %>%
+  mutate(month_number=month(Captivity.Date))
+
+bo_dates2
+``` 
+
+
+
+Create a new column called *month_number* and extract the month (as a label) from the *Captivity.Date*.
+
+
+
+```{r mo2, exercise=TRUE, exercise.lines=5}
+bo_dates3 <- bo_dates2 %>%
+  mutate(month_label=____(_______, ______))
+
+bo_dates3
+```
+
+
+```{r mo2-check}
+bo_dates3 <- bo_dates2  %>%
+  mutate(month_label=month(Captivity.Date, label=T))
+
+bo_dates3
+``` 
+
+
+### Time difference
+
+Consider the modified **bo_dates3** data frame we've created.
+
+```{r last_bo}
+bo_dates3
+```
+
+Based on available data, can you figure out the average age (in years) of Beluga Whales and Orca Whales (separately) when they join a facility (aka *Facility.Date*)?
+
+Summarize your dataframe (group by *Facility* and *Species*) and create a new column called *average_years*.
+
+```{r lo, exercise=TRUE, exercise.lines=15, warning=F, message=F}
+bo_dates3 %>%
+```
+
+
+```{r lo-check}
+bo_dates3 %>%
+  mutate(Birth.Date=dmy(Birth.Date), 
+         Facility.Date=dmy(Facility.Date),
+         age=difftime(Facility.Date, Birth.Date),
+         age_years=as.numeric(age)/60/60/24/365.25) %>% 
+  group_by(Facility, Species) %>% 
+  summarize(average_years=mean(age_years, na.rm=T))
+  
+``` 
+
+
+
+<div id="lo-hint">
+**Hint:** This one's tough. You'll need to convert *Birth.Date* and *Facility.Date* into dates. Then you'll need to figure out the difference in time between them. And then you'll need to convert that into a number and if it's in seconds, you need to convert that into years. The math for that is seconds/60/60/24/365.25. And then group by how I described. And then when you summarize, be sure when you're finding the average to remove NAs from the calculations. Good luck.
+</div>
+
+Alright, we can't really tell the ages because of negative years? It looks like this data is pretty messy. Probably human error.
+
+But great job! You've made it all the way through this chapter!

@@ -1,0 +1,35 @@
+---
+title: "R for Journalists"
+output: html_notebook
+---
+
+# Introduction to R for Journalists: How to Find Great Stories in Data
+
+### This online course is presented in five weekly modules, starting on July 23, 2018 and ending on August 26, 2018. [Course link](https://journalismcourses.org/course/view.php?id=9)
+
+## Week 1
+During the first week we covered the basics of the R language.
+
+- A tour of the RStudio IDE - *complete*
+- Syntax for coding in R - *complete*
+- Creating R scripts - *complete*
+- Importing packages - *complete*
+- Good habits for workflow and documentation habits *complete*
+- How to import data like CSVs, Excel spreadsheets, XML *complete*
+- Exploring the data???s structure *complete*
+
+Quick recap of the main commands:
+```{r}
+#Installing packages
+install.packages("readr")
+library(readr)
+
+#Import data with R
+mydata <- read_csv("dataset.csv")
+
+```
+
+## Week 2
+- Wrangling data with the dplyr and tidyr packages.
+
+
