@@ -10,3 +10,5 @@
 - Good habits for workflow and documentation habits
 - How to import data like CSVs, Excel spreadsheets, XML
 - Exploring the data’s structure
+
+## Week 2
