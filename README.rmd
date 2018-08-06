@@ -3,11 +3,13 @@ title: "R for Journalists"
 output: html_notebook
 ---
 
-# Introduction to R for Journalists: How to Find Great Stories in Data
+## Introduction to R for Journalists: How to Find Great Stories in Data
 
 ### Here are my course notes for Andrew Tran's five week course on R for journalists. The cours started on July 23, 2018 and will end on August 26, 2018. [Course link](https://journalismcourses.org/course/view.php?id=9)
 
-## Week 1
+---
+
+# Week 1
 During the first week we covered the basics of the R language. I know most of these commands which I documented in my other R github repo here: [RstatsInTheBatcave](https://github.com/megomars/RStatisticsInTheBatcave) and here: [TidyverseInTheBatcave](https://github.com/megomars/TidyverseInTheBatcave).
 
 This is what we did in week 1:
@@ -111,8 +113,12 @@ library(readr)
 
 ![Setting shortcuts](datapasta2.png)
 
-## Week 2
+---
+
+# Week 2
 - Wrangling data with the dplyr and tidyr packages.
 
-## Week 3
-- Visualising data with ggplot2
+---
+
+# Week 3
+- Visualising data with ggplot2.

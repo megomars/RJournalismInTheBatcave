@@ -39,3 +39,5 @@ data/jcpd-all.csv
 scripts/keys.R
 comments
 .Rproj.user
+
+*.sav
