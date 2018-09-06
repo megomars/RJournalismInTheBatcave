@@ -98,4 +98,40 @@ rm(new_labels)
 rm(new_data_only)
 rm(packages)
 rm(temp)
-file.remove("data/SHR76_16.sav")
+#file.remove("data/SHR76_16.sav")
+
+View(head(murders, n=20))
+ncol(murders)
+
+how_many_agencies <- unique(murders$Agency)
+length(how_many_agencies)
+
+how_many_unique_id <- unique(murders$ID)
+nrow(murders)-length(how_many_unique_id)
+
+how_many_sources <- unique(murders$Source_label)
+glimpse(murders)
+
+goodages <- murders %>% filter(VicAge<999 & OffAge<999)
+hist(goodages$OffAge, breaks=40)
+min(goodages$OffAge)
+?hist
+typeof(goodages)
+max(goodages$Year)
+
+glimpse(goodages)
+#this selects the 22nd and 24th values
+murderAgeGen <- murders[c(22,24)]
+glimpse(murderAgeGen)
+
+murderAgeGenD <- murders %>% select(VicAge: VicSex_value)
+
+glimpse(murderAgeGenD)
+identical(murderAgeGen,murderAgeGenD)
+murderAgeGen == murderAgeGenD
+typeof(murderAgeGenD)
+
+Z<-c(3,4,5)
+X<-c(4-1,2*2,5*1)
+X==Z
+identical(X,Z)

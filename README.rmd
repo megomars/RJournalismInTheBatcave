@@ -5,7 +5,7 @@ output: html_notebook
 
 ## Introduction to R for Journalists: How to Find Great Stories in Data
 
-### Here are my course notes for Andrew Tran's five week course on R for journalists. The cours started on July 23, 2018 and will end on August 26, 2018. [Course link](https://journalismcourses.org/course/view.php?id=9)
+### Here are my course notes for Andrew Tran's five week course on R for journalists. The course started on July 23, 2018 and will end on August 26, 2018. [Course link](https://journalismcourses.org/course/view.php?id=9)
 
 ---
 
@@ -117,7 +117,19 @@ library(readr)
 
 # Week 2
 - Wrangling data with the dplyr and tidyr packages.
+Dplyr is used to explore and transform data-frames.
+The basic verbs are:
 
+F-SAMS-Gb
+```{r}
+filter() 
+select()
+arrange()
+mutate()
+summarize()
+group_by()
+![DPLYR cheatsheet](dplyrcheatsheet.jpg)
+```
 ---
 
 # Week 3
