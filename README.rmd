@@ -130,7 +130,7 @@ summarize()
 group_by()
 ```
 
-![DPLYR cheatsheet](dplyrcheatsheet.jpg)
+![](dplyrcheatsheet.jpg)
 ---
 
 # Week 3
