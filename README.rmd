@@ -1,6 +1,9 @@
 ---
 title: "R for Journalists"
-output: html_notebook
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
 ## Introduction to R for Journalists: How to Find Great Stories in Data
@@ -33,11 +36,8 @@ This is what we did in week 1:
 
 Quick recap of the main commands:
 ```{r}
-#set working directory
-setwd("~/projects/learn-r-journalism")
-
 #run the entire saved script.R
-source("script.R")
+#source("script.R")
 
 #Installing packages
 install.packages("readr")
@@ -128,7 +128,7 @@ The basic verbs are:
 #summarize()
 #group_by()
 ```
-![DPLYR cheatsheet](dplyrcheatsheet.jpg)
+![Dplyr cheatsheet](dplyr-cheatsheet.jpg)
 
 ---
 
