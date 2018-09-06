@@ -129,6 +129,7 @@ mutate()
 summarize()
 group_by()
 ```
+
 ![DPLYR cheatsheet](dplyrcheatsheet.jpg)
 ---
 
