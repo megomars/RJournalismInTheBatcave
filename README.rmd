@@ -8,12 +8,12 @@ output:
 
 ## Introduction to R for Journalists: How to Find Great Stories in Data
 
-### Here are my course notes for Andrew Tran's five week course on R for journalists. The course started on July 23, 2018 and will end on August 26, 2018. [Course link](https://journalismcourses.org/course/view.php?id=9)
+### Here are my course notes for Andrew Tran's five week course on R for journalists. The course started on July 23, 2018 and ended on August 26, 2018. [Course link](https://journalismcourses.org/course/view.php?id=9)
 
 ---
 
 # Week 1
-During the first week we covered the basics of the R language. I know most of these commands which I documented in my other R github repo here: [RstatsInTheBatcave](https://github.com/megomars/RStatisticsInTheBatcave) and here: [TidyverseInTheBatcave](https://github.com/megomars/TidyverseInTheBatcave).
+During the first week we covered the basics of the R language. I know most of these commands which I documented in my other R github repos here: [RstatsInTheBatcave](https://github.com/megomars/RStatisticsInTheBatcave) and here: [TidyverseInTheBatcave](https://github.com/megomars/TidyverseInTheBatcave).
 
 This is what we did in week 1:
 - A tour of the RStudio IDE - *complete*
@@ -32,7 +32,7 @@ This is what we did in week 1:
   - delimited data - here we use base R and read.table or read_delim
   - JSON data - here we used the jsonlite package
   - SPSS data - here we used base R's read.spss()
-  - Copying and pasting data
+  - Copying and pasting data - I found this to be really useful.
 
 Quick recap of the main commands:
 ```{r}
@@ -117,9 +117,9 @@ library(readr)
 
 # Week 2
 - Wrangling data with the dplyr and tidyr packages.
-Dplyr is used to explore and transform data-frames.
+Dplyr is used to explore and transform data-frames. The tidyverse is a coherent system of packages for data manipulation, exploration and visualization that share a common design philosophy. Fundamentally, the tidyverse is about the connections between the tools that make the workflow possible.
 
-The basic verbs are:
+The basic verbs of DPLYR are:
 ```{r}
 #filter() 
 #select()
@@ -134,3 +134,26 @@ The basic verbs are:
 
 # Week 3
 - Visualising data with ggplot2.
+GGPlot2 is a data visualization library created by Hadley Wickham. It is based on the "grammar of graphics", an idea that a graph can be built and rebuilt using interchangable components.
+
+At its core it contains:
+
+![The layers involved](layers.png)
+
+* Data - dataset being plotted.
+* Aesthetics - scales onto which we map our data.
+* Geometries - The visual elements used for our data.
+* Facets - Plotting small multiples.
+* Statistics - Representations of our data to aid understanding.
+* Coordinates - The space on which the data will be plotted.
+* Themes - All non-data ink.
+
+---
+
+# Week 4
+- Spatial analysis
+
+---
+
+# Week 5
+- Publishing for reproducibility
